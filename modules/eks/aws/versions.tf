@@ -1,7 +1,3 @@
-provider "aws" {
-  region = "us-east-1"
-}
-
 terraform {
   required_providers {
     random = {
@@ -9,7 +5,8 @@ terraform {
       version = "~> 3.4"
     }
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
+      version = "~> 4.54"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"

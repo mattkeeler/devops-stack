@@ -13,14 +13,14 @@ module "iam_assumable_role_loki" {
   create_role                   = true
   number_of_role_policy_arns    = 1
   role_name                     = format("loki-%s", var.cluster_name)
-  provider_url                  = replace(module.cluster.cluster_oidc_issuer_url, "https://", "")
+  provider_url                  = replace(module.eks.cluster_oidc_issuer_url, "https://", "")
   role_policy_arns              = [aws_iam_policy.loki.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:loki-stack:loki-stack"]
 }
 
 resource "aws_iam_policy" "loki" {
   name_prefix = "loki"
-  description = "EKS loki policy for cluster ${module.cluster.cluster_id}"
+  description = "EKS loki policy for cluster ${module.eks.cluster_id}"
   policy      = data.aws_iam_policy_document.loki.json
 }
 

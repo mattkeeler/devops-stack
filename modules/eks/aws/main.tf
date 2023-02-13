@@ -3,8 +3,8 @@ locals {
   kubernetes_host                   = data.aws_eks_cluster.cluster.endpoint
   kubernetes_cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
   kubernetes_token                  = data.aws_eks_cluster_auth.cluster.token
-  #kubeconfig                        = module.cluster.aws_auth_configmap_yaml
-  #kubeconfig = module.cluster.kubeconfig
+  #kubeconfig                        = module.eks.aws_auth_configmap_yaml
+  #kubeconfig = module.eks.kubeconfig
 
   oidc = var.oidc != null ? var.oidc : {
     issuer_url              = format("https://cognito-idp.%s.amazonaws.com/%s", data.aws_region.current.name, var.cognito_user_pool_id)
@@ -64,11 +64,11 @@ data "aws_subnet_ids" "public" {
 
 
 data "aws_eks_cluster" "cluster" {
-  name = module.cluster.cluster_id
+  name = module.eks.cluster_id
 }
 
 data "aws_eks_cluster_auth" "cluster" {
-  name = module.cluster.cluster_id
+  name = module.eks.cluster_id
 }
 
 provider "helm" {
@@ -85,7 +85,7 @@ provider "kubernetes" {
   token                  = local.kubernetes_token
 }
 
-module "cluster" {
+module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "19.7.0"
 
@@ -106,13 +106,14 @@ module "cluster" {
   aws_auth_users    = var.aws_auth_users
 
   manage_aws_auth_configmap = true
+  create_aws_auth_configmap = true
 
   eks_managed_node_group_defaults = var.eks_managed_node_group_defaults
   eks_managed_node_groups         = var.eks_managed_node_groups
 }
 
 resource "aws_security_group_rule" "workers_ingress_healthcheck_https" {
-  security_group_id = module.cluster.node_security_group_id
+  security_group_id = module.eks.node_security_group_id
   type              = "ingress"
   protocol          = "TCP"
   from_port         = 443
@@ -121,7 +122,7 @@ resource "aws_security_group_rule" "workers_ingress_healthcheck_https" {
 }
 
 resource "aws_security_group_rule" "workers_ingress_healthcheck_http" {
-  security_group_id = module.cluster.node_security_group_id
+  security_group_id = module.eks.node_security_group_id
   type              = "ingress"
   protocol          = "TCP"
   from_port         = 80
@@ -180,6 +181,6 @@ module "argocd" {
   ]
 
   depends_on = [
-    module.cluster,
+    module.eks,
   ]
 }

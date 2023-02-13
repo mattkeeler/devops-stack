@@ -1,6 +1,7 @@
 variable "kubeconfig" {
   description = "The content of the KUBECONFIG file."
   type        = string
+  default     = ""
 }
 
 variable "repo_url" {

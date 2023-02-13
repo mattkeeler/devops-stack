@@ -4,7 +4,7 @@ locals {
   kubernetes_cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
   kubernetes_token                  = data.aws_eks_cluster_auth.cluster.token
   #kubeconfig                        = module.cluster.aws_auth_configmap_yaml
-  kubeconfig = module.cluster.kubeconfig
+  #kubeconfig = module.cluster.kubeconfig
 
   oidc = var.oidc != null ? var.oidc : {
     issuer_url              = format("https://cognito-idp.%s.amazonaws.com/%s", data.aws_region.current.name, var.cognito_user_pool_id)

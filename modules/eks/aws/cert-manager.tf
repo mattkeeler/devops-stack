@@ -26,7 +26,7 @@ resource "aws_iam_policy" "cert_manager" {
   for_each = local.all_domains
 
   name_prefix = "cert-manager"
-  description = "EKS cert-manager policy for cluster ${module.eks.cluster_id}"
+  description = "EKS cert-manager policy for cluster ${var.cluster_name}"
   policy      = data.aws_iam_policy_document.cert_manager[each.key].json
 }
 

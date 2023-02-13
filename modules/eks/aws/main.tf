@@ -3,7 +3,8 @@ locals {
   kubernetes_host                   = data.aws_eks_cluster.cluster.endpoint
   kubernetes_cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
   kubernetes_token                  = data.aws_eks_cluster_auth.cluster.token
-  kubeconfig                        = module.cluster.kubeconfig
+  #kubeconfig                        = module.cluster.aws_auth_configmap_yaml
+  kubeconfig = module.cluster.kubeconfig
 
   oidc = var.oidc != null ? var.oidc : {
     issuer_url              = format("https://cognito-idp.%s.amazonaws.com/%s", data.aws_region.current.name, var.cognito_user_pool_id)
@@ -18,6 +19,30 @@ locals {
 
 data "aws_vpc" "this" {
   id = var.vpc_id
+}
+
+data "aws_subnets" "private" {
+  filter {
+    name   = "vpc-id"
+    values = [var.vpc_id]
+  }
+
+  tags = {
+    Tier                              = "Private"
+    "kubernetes.io/role/internal-elb" = "1"
+  }
+}
+
+data "aws_subnets" "public" {
+  filter {
+    name   = "vpc-id"
+    values = [var.vpc_id]
+  }
+
+  tags = {
+    Tier                     = "Public"
+    "kubernetes.io/role/elb" = "1"
+  }
 }
 
 data "aws_subnet_ids" "private" {
@@ -35,6 +60,8 @@ data "aws_subnet_ids" "public" {
     "kubernetes.io/role/elb" = "1"
   }
 }
+
+
 
 data "aws_eks_cluster" "cluster" {
   name = module.cluster.cluster_id
@@ -58,46 +85,43 @@ provider "kubernetes" {
   token                  = local.kubernetes_token
 }
 
-locals {
-  ingress_worker_group = merge(var.worker_groups.0, { target_group_arns = concat(module.nlb.target_group_arns, module.nlb_private.target_group_arns) })
-}
-
 module "cluster" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "15.1.0"
+  version = "19.7.0"
 
   cluster_name    = var.cluster_name
   cluster_version = var.cluster_version
+
+  vpc_id      = var.vpc_id
+  subnet_ids  = data.aws_subnet_ids.private.ids
+  enable_irsa = true
 
   cluster_endpoint_private_access = true
   cluster_endpoint_public_access  = true
 
   cluster_endpoint_public_access_cidrs = var.cluster_endpoint_public_access_cidrs
 
-  subnets          = data.aws_subnet_ids.private.ids
-  vpc_id           = var.vpc_id
-  enable_irsa      = true
-  write_kubeconfig = false
-  map_accounts     = var.map_accounts
-  map_roles        = var.map_roles
-  map_users        = var.map_users
+  aws_auth_accounts = var.aws_auth_accounts
+  aws_auth_roles    = var.aws_auth_roles
+  aws_auth_users    = var.aws_auth_users
 
-  worker_groups = concat([local.ingress_worker_group], try(slice(var.worker_groups, 1, length(var.worker_groups)), []))
+  manage_aws_auth_configmap = true
 
-  kubeconfig_aws_authenticator_command      = var.kubeconfig_aws_authenticator_command
-  kubeconfig_aws_authenticator_command_args = var.kubeconfig_aws_authenticator_command_args
+  eks_managed_node_group_defaults = var.eks_managed_node_group_defaults
+  eks_managed_node_groups         = var.eks_managed_node_groups
 }
 
 resource "aws_security_group_rule" "workers_ingress_healthcheck_https" {
-  security_group_id = module.cluster.worker_security_group_id
+  security_group_id = module.cluster.node_security_group_id
   type              = "ingress"
   protocol          = "TCP"
   from_port         = 443
   to_port           = 443
   cidr_blocks       = [data.aws_vpc.this.cidr_block]
 }
+
 resource "aws_security_group_rule" "workers_ingress_healthcheck_http" {
-  security_group_id = module.cluster.worker_security_group_id
+  security_group_id = module.cluster.node_security_group_id
   type              = "ingress"
   protocol          = "TCP"
   from_port         = 80

@@ -1,7 +1,7 @@
 variable "cluster_version" {
   description = "Kubernetes version to use for the EKS cluster."
   type        = string
-  default     = "1.21"
+  default     = "1.24"
 }
 
 variable "base_domain" {
@@ -27,36 +27,37 @@ variable "vpc_id" {
   type        = string
 }
 
-variable "map_accounts" {
-  description = "Additional AWS account numbers to add to the aws-auth configmap. See examples/basic/variables.tf in the terraform-aws-eks module's code for example format."
-  type        = list(string)
+variable "aws_auth_roles" {
+  description = "List of role maps to add to the aws-auth configmap"
+  type        = list(any)
   default     = []
 }
 
-variable "map_roles" {
-  description = "Additional IAM roles to add to the aws-auth configmap. See examples/basic/variables.tf in the terraform-aws-eks module's code for example format."
-  type = list(object({
-    rolearn  = string
-    username = string
-    groups   = list(string)
-  }))
-  default = []
+variable "aws_auth_users" {
+  description = "List of user maps to add to the aws-auth configmap"
+  type        = list(any)
+  default     = []
 }
 
-variable "map_users" {
-  description = "Additional IAM users to add to the aws-auth configmap. See examples/basic/variables.tf in the terraform-aws-eks module's code for example format."
-  type = list(object({
-    userarn  = string
-    username = string
-    groups   = list(string)
-  }))
-  default = []
+variable "aws_auth_accounts" {
+  description = "List of account maps to add to the aws-auth configmap"
+  type        = list(any)
+  default     = []
 }
 
-variable "worker_groups" {
-  description = "A list of maps defining worker group configurations to be defined using AWS Launch Configurations. See workers_group_defaults for valid keys."
+variable "eks_managed_node_groups" {
+  description = "Map of EKS managed node group definitions to create"
   type        = any
-  default     = []
+  default     = {}
+}
+
+variable "eks_managed_node_group_defaults" {
+  description = "Map of EKS managed node group default configurations"
+  type        = any
+  default = {
+    ami_type       = "AL2_x86_64"
+    instance_types = ["m5d.large"]
+  }
 }
 
 variable "cognito_user_pool_id" {
@@ -69,18 +70,6 @@ variable "cognito_user_pool_domain" {
   description = "Domain prefix of the Cognito user pool to use (custom domain currently not supported!)."
   type        = string
   default     = null
-}
-
-variable "kubeconfig_aws_authenticator_command" {
-  description = "Override the kubeconfig authenticator command"
-  type        = string
-  default     = "aws-iam-authenticator"
-}
-
-variable "kubeconfig_aws_authenticator_command_args" {
-  description = "Override the kubeconfig authenticator arguments"
-  type        = list(string)
-  default     = []
 }
 
 variable "enable_efs" {

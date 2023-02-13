@@ -12,14 +12,9 @@ output "cluster_oidc_issuer_url" {
   value       = module.cluster.cluster_oidc_issuer_url
 }
 
-output "worker_security_group_id" {
-  description = "Security group ID attached to the EKS workers."
-  value       = module.cluster.worker_security_group_id
-}
-
-output "worker_iam_role_name" {
-  description = "default IAM role name for EKS worker groups"
-  value       = module.cluster.worker_iam_role_name
+output "node_security_group_id" {
+  description = "ID of the node shared security group"
+  value       = module.cluster.node_security_group_id
 }
 
 output "kubernetes_host" {
@@ -32,4 +27,9 @@ output "kubernetes_cluster_ca_certificate" {
 
 output "kubernetes_token" {
   value = local.kubernetes_token
+}
+
+output "eks_managed_node_groups" {
+  description = "Map of attribute maps for all EKS managed node groups created"
+  value       = module.cluster.eks_managed_node_groups
 }

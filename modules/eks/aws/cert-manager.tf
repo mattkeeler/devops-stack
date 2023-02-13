@@ -1,11 +1,11 @@
 locals {
-  all_domains = toset(compact(distinct(concat([var.base_domain], var.other_domains)))) 
-} 
+  all_domains = toset(compact(distinct(concat([var.base_domain], var.other_domains))))
+}
 
 data "aws_route53_zone" "this" {
   for_each = local.all_domains
 
-   name = each.key
+  name = each.key
 }
 
 data "aws_region" "current" {}
@@ -14,7 +14,7 @@ module "iam_assumable_role_cert_manager" {
   count = length(local.all_domains) == 0 ? 0 : 1
 
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "4.0.0"
+  version                       = "5.11.1"
   create_role                   = true
   role_name                     = format("cert-manager-%s", var.cluster_name)
   provider_url                  = replace(module.cluster.cluster_oidc_issuer_url, "https://", "")
@@ -27,7 +27,7 @@ resource "aws_iam_policy" "cert_manager" {
 
   name_prefix = "cert-manager"
   description = "EKS cert-manager policy for cluster ${module.cluster.cluster_id}"
-  policy = data.aws_iam_policy_document.cert_manager[each.key].json
+  policy      = data.aws_iam_policy_document.cert_manager[each.key].json
 }
 
 data "aws_iam_policy_document" "cert_manager" {

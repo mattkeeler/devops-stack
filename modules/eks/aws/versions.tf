@@ -1,30 +1,33 @@
+provider "aws" {
+  region = "us-east-1"
+}
+
 terraform {
   required_providers {
     random = {
       source  = "hashicorp/random"
-      version = "~> 3.0"
+      version = "~> 3.4"
     }
     aws = {
-      source  = "hashicorp/aws"
-      version = "~> 3.37"
+      source = "hashicorp/aws"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "~> 2.0"
+      version = "~> 2.17"
     }
     helm = {
       source  = "hashicorp/helm"
-      version = "~> 2.0"
+      version = "~> 2.8"
     }
     local = {
       source  = "hashicorp/local"
-      version = "~> 2.0"
+      version = "~> 2.3"
     }
     null = {
       source  = "hashicorp/null"
-      version = "~> 3.0"
+      version = "~> 3.2"
     }
   }
 
-  required_version = ">= 0.13"
+  required_version = ">= 1.0.1"
 }

@@ -141,9 +141,9 @@ resource "null_resource" "wait_for_app_of_apps" {
     EOT
 
     environment = {
-      ARGOCD_OPTS        = local.argocd_opts
-      KUBECONFIG_CONTENT = var.kubeconfig
-      ARGOCD_AUTH_TOKEN  = jwt_hashed_token.argocd.token
+      ARGOCD_OPTS = local.argocd_opts
+      #KUBECONFIG_CONTENT = var.kubeconfig
+      ARGOCD_AUTH_TOKEN = jwt_hashed_token.argocd.token
     }
   }
 }

@@ -35,7 +35,7 @@ locals {
 
 module "nlb" {
   source  = "terraform-aws-modules/alb/aws"
-  version = "6.0.0"
+  version = "8.3.1"
 
   create_lb = var.create_public_nlb
 
@@ -62,7 +62,7 @@ module "nlb_private" {
   load_balancer_type = "network"
 
   vpc_id                           = data.aws_vpc.this.id
-  subnets                          = data.aws_subnet_ids.private.ids
+  subnets                          = data.aws_subnets.private.ids
   enable_cross_zone_load_balancing = true
   internal                         = true
 

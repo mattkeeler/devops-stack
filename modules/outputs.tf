@@ -4,12 +4,6 @@ output "argocd_auth_token" {
   sensitive   = true
 }
 
-output "kubeconfig" {
-  description = "The content of the KUBECONFIG file."
-  value       = local.kubeconfig
-  sensitive   = true
-}
-
 output "argocd_server" {
   description = "The URL of the ArgoCD server."
   value       = format("argocd.apps.%s.%s:443", var.cluster_name, local.base_domain)

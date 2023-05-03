@@ -7,6 +7,11 @@ output "cluster_name" {
   value       = module.eks.cluster_name
 }
 
+output "cluster_id" {
+  description = "The name of the EKS cluster"
+  value       = module.eks.cluster_id
+}
+
 output "cluster_oidc_issuer_url" {
   description = "The URL on the EKS cluster OIDC Issuer"
   value       = module.eks.cluster_oidc_issuer_url

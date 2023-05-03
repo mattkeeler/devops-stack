@@ -87,9 +87,9 @@ provider "kubernetes" {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "19.7.0"
+  version = "19.13.1"
 
-  cluster_name    = var.cluster_name
+  cluster_name    = "kube-cluster"
   cluster_version = var.cluster_version
 
   vpc_id      = var.vpc_id
